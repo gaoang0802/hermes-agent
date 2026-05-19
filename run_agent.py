@@ -15201,7 +15201,7 @@ class AIAgent:
                         )
 
                     if self.compression_enabled and _compressor.should_compress(_real_tokens):
-                        self._safe_print("  ⟳ compacting context…")
+                        self._safe_print(f"  {t('run_agent.compacting_context_short')}")
                         messages, active_system_prompt = self._compress_context(
                             messages, system_message,
                             approx_tokens=self.context_compressor.last_prompt_tokens,

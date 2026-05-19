@@ -376,6 +376,7 @@ gateway:
   restart_notice: ⚠️ Gateway restarting — Your current task will be interrupted. Send any message after restart and I'll try to resume where you left off.
 run_agent:
   compacting_context: 🗜️ Compacting context — summarizing earlier conversation so I can continue...
+  compacting_context_short: ⟳ compacting context…
   preflight_compression: '📦 Preflight compression: ~{tokens} tokens >= {threshold} threshold. This may take a moment.'
   stream_reconnect: ⚠️ {provider} stream {kind} ({error_type}){suffix} — reconnecting, retry {attempt}/{max_attempts}
   auxiliary_failed: '⚠ Auxiliary {task} failed: {detail}'

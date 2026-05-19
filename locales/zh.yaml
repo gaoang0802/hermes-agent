@@ -361,6 +361,7 @@ gateway:
   restart_notice: ⚠️ 网关正在重启 — 当前任务将被中断。重启后发送任意消息，我将尝试从中断处恢复。
 run_agent:
   compacting_context: 🗜️ 正在压缩上下文 — 总结之前的对话以便继续...
+  compacting_context_short: ⟳ 正在压缩上下文…
   preflight_compression: '📦 预检压缩: ~{tokens} tokens >= {threshold} 阈值。可能需要一些时间。'
   stream_reconnect: ⚠️ {provider} 流 {kind} ({error_type}){suffix} — 重新连接中, 重试 {attempt}/{max_attempts}
   auxiliary_failed: '⚠ 辅助任务 {task} 失败: {detail}'

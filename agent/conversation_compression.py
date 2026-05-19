@@ -290,7 +290,7 @@ def compress_context(
         focus_topic,
     )
     agent._emit_status(
-        "🗜️ Compacting context — summarizing earlier conversation so I can continue..."
+        t("run_agent.compacting_context")
     )
 
     # Notify external memory provider before compression discards context
