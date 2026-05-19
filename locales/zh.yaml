@@ -367,6 +367,10 @@ run_agent:
   aux_task_background_review: 后台审核
   aux_task_title_generation: 标题生成
   self_improvement_review: '💾 自我改进审查: {summary}'
+  compression_aborted: '⚠ 压缩已中止: {error}。未删除任何消息 — 对话继续不变。运行 /compress 重试，或运行 /new 开始新会话。'
+  compression_summary_failed: '⚠ 压缩摘要失败: {error}。已插入回退上下文标记。'
+  compression_aux_failed: "ℹ 配置的压缩模型 '{model}' 失败({error})。已使用主模型恢复 — 请检查 config.yaml 中的 auxiliary.compression.model。"
+  tool_completed: '工具完成: {name} ({duration}秒)'
   empty_malformed_response: ⚠️ 空/格式异常响应 — 切换到备用提供商...
   max_retries_invalid_try_fallback: ⚠️ 已达最大重试次数({max_retries})，响应无效 — 尝试备用提供商...
   max_retries_invalid_giving_up: ❌ 已达最大重试次数({max_retries})，响应无效。放弃。

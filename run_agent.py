@@ -11244,7 +11244,7 @@ class AIAgent:
                     print(f"  ✅ Tool {i+1} completed in {tool_duration:.2f}s - {response_preview}")
 
             self._current_tool = None
-            self._touch_activity(f"tool completed: {name} ({tool_duration:.1f}s)")
+            self._touch_activity(t("run_agent.tool_completed", name=name, duration=f"{tool_duration:.1f}"))
 
             if not blocked and self.tool_complete_callback:
                 try:
@@ -11661,7 +11661,7 @@ class AIAgent:
                     logging.debug(f"Tool progress callback error: {cb_err}")
 
             self._current_tool = None
-            self._touch_activity(f"tool completed: {function_name} ({tool_duration:.1f}s)")
+            self._touch_activity(t("run_agent.tool_completed", name=function_name, duration=f"{tool_duration:.1f}"))
 
             if self.verbose_logging:
                 logging.debug(f"Tool {function_name} completed in {tool_duration:.2f}s")

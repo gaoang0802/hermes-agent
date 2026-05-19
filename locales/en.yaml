@@ -382,6 +382,10 @@ run_agent:
   aux_task_background_review: background review
   aux_task_title_generation: title generation
   self_improvement_review: '💾 Self-improvement review: {summary}'
+  compression_aborted: '⚠ Compression aborted: {error}. No messages were dropped — conversation continues unchanged. Run /compress to retry, or /new to start a fresh session.'
+  compression_summary_failed: '⚠ Compression summary failed: {error}. Inserted a fallback context marker.'
+  compression_aux_failed: "ℹ Configured compression model '{model}' failed ({error}). Recovered using main model — check auxiliary.compression.model in config.yaml."
+  tool_completed: 'tool completed: {name} ({duration}s)'
   empty_malformed_response: ⚠️ Empty/malformed response — switching to fallback...
   max_retries_invalid_try_fallback: ⚠️ Max retries ({max_retries}) for invalid responses — trying fallback...
   max_retries_invalid_giving_up: ❌ Max retries ({max_retries}) exceeded for invalid responses. Giving up.
