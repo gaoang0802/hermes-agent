@@ -349,6 +349,7 @@ gateway:
     session_db_unavailable_prefix: "База даних сеансів недоступна"
     session_not_found:           "Сеанс не знайдено в базі даних."
     warn_passthrough:            "⚠️ {error}"
+  approval_text_prompt: "⚠️ **Dangerous command requires approval:**\n```\n{command}\n```\nReason: {reason}\n\nReply `/approve` to execute, `/approve session` to approve this pattern for the session, `/approve always` to approve permanently, or `/deny` to cancel."
   queued_next_turn: ⏳ Queued for the next turn{status_detail}. I'll respond once the current task finishes.
   interrupting_current_task: ⚡ Interrupting current task{status_detail}. I'll respond to your message shortly.
   model_no_response: ⚠️ The model returned no response after processing tool results. This can happen with some models — try again or rephrase your question.
@@ -395,3 +396,17 @@ run_agent:
   context_too_large: 🗜️ Context too large (~{tokens} tokens) — compressing ({attempt}/{max_attempts})...
   non_retryable_error_try_fallback: ⚠️ Non-retryable error (HTTP {status_code}) — trying fallback...
   non_retryable_error: '❌ Non-retryable error (HTTP {status_code}): {error}'
+  no_response_aborting: '⚠️ No response from provider for {elapsed}s (non-streaming, model: {model}). Aborting call.'
+  stream_malformed_data: '❌ Provider returned malformed streaming data after {attempts} attempts. The provider may be experiencing issues — try again in a moment.'
+  stream_connection_failed: '❌ Connection to provider failed after {attempts} attempts. The provider may be experiencing issues — try again in a moment.'
+  no_response_reconnecting: '⚠️ No response from provider for {elapsed}s (model: {model}, context: ~{context} tokens). Reconnecting...'
+  primary_failed_switch_fallback: '🔄 Primary model failed — switching to fallback: {fb_model} via {fb_provider}'
+  stale_connections_cleaned: 🔌 Detected stale connections from a previous provider issue — cleaned up automatically. Proceeding with fresh connection.
+  context_reduced_retrying: '🗜️ Context reduced to {reduced} tokens (was {old}), retrying...'
+  tool_guardrail_halted: '⚠️ Tool guardrail halted {tool_name}: {code}'
+  stream_interrupted_use_delivered: ↻ Stream interrupted — using delivered content as final response
+  iteration_budget_exhausted: '⚠️ Iteration budget exhausted ({api_call_count}/{max_iterations}) — asking model to summarise'
+  compression_provider_unavailable: "⚠ Configured auxiliary compression provider '{provider}' is unavailable — context compression will drop middle turns without a summary. Check auxiliary.compression in config.yaml and reauthenticate that provider."
+  compression_no_provider: ⚠ No auxiliary LLM provider configured — context compression will drop middle turns without a summary. Run `hermes setup` or set OPENROUTER_API_KEY.
+  compression_model_context_low: |-
+  nous_rate_limit: '⏳ {nous_msg}'

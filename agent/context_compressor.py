@@ -54,8 +54,8 @@ LEGACY_SUMMARY_PREFIX = "[CONTEXT SUMMARY]:"
 # Minimum tokens for the summary output
 _MIN_SUMMARY_TOKENS = 2000
 # Proportion of compressed content to allocate for summary
-# HERMES-PATCH: reduced from 0.20 to 0.08 to save ~¥9/day on compression output tokens
-_SUMMARY_RATIO = 0.08
+# HERMES-PATCH: restored to 0.20 — 0.08 caused compression failure (output ≈ input, deadloop)
+_SUMMARY_RATIO = 0.20
 # Absolute ceiling for summary tokens (even on very large context windows)
 _SUMMARY_TOKENS_CEILING = 12_000
 

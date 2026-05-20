@@ -396,3 +396,26 @@ run_agent:
   context_too_large: 🗜️ 上下文过大 (~{tokens} tokens) — 压缩中 ({attempt}/{max_attempts})...
   non_retryable_error_try_fallback: ⚠️ 不可重试的错误 (HTTP {status_code}) — 尝试备用提供商...
   non_retryable_error: '❌ 不可重试的错误 (HTTP {status_code}): {error}'
+  no_response_aborting: '⚠️ 提供商在 {elapsed}秒内无响应 (非流式, 模型: {model})。中止调用。'
+  stream_malformed_data: '❌ 提供商在 {attempts} 次尝试后返回了格式异常的流数据。提供商可能存在问题 — 请稍后再试。'
+  stream_connection_failed: '❌ 与提供商的连接在 {attempts} 次尝试后失败。提供商可能存在问题 — 请稍后再试。'
+  no_response_reconnecting: '⚠️ 提供商在 {elapsed}秒内无响应 (模型: {model}, 上下文: ~{context} tokens)。重新连接中...'
+  primary_failed_switch_fallback: '🔄 主模型失败 — 切换到备用: {fb_model} ({fb_provider})'
+  stale_connections_cleaned: 🔌 检测到上次提供商问题遗留的过期连接 — 已自动清理。使用新连接继续。
+  context_reduced_retrying: '🗜️ 上下文已缩减至 {reduced} tokens (原为 {old})，重试中...'
+  tool_guardrail_halted: '⚠️ 工具护栏停止 {tool_name}: {code}'
+  stream_interrupted_use_delivered: ↻ 数据流中断 — 使用已接收内容作为最终响应
+  iteration_budget_exhausted: '⚠️ 迭代预算已耗尽 ({api_call_count}/{max_iterations}) — 请求模型进行总结'
+  compression_provider_unavailable: "⚠ 配置的压缩提供商 '{provider}' 不可用 — 上下文压缩将丢弃中间轮次而无摘要。请检查 config.yaml 中的 auxiliary.compression 并重新认证该提供商。"
+  compression_no_provider: ⚠ 未配置辅助 LLM 提供商 — 上下文压缩将丢弃中间轮次而无摘要。运行 `hermes setup` 或设置 OPENROUTER_API_KEY。
+  compression_model_context_low: |-
+    ⚠ 压缩模型 {aux_label} 的上下文为 {aux_context} tokens，但主模型 {main_label} 的压缩阈值为 {old_threshold} tokens。已自动将此会话的阈值降至 {new_threshold} tokens 以继续压缩。
+      要永久生效，请编辑 config.yaml — 选择以下之一：
+      1. 使用更大的压缩模型：
+           auxiliary:
+             compression:
+               model: <至少 {old_threshold}+ 上下文的模型>
+      2. 降低压缩阈值：
+           compression:
+             threshold: {safe_pct}
+  nous_rate_limit: '⏳ {nous_msg}'

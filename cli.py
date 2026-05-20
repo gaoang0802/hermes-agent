@@ -38,6 +38,20 @@ import time
 import uuid
 import textwrap
 from collections import deque
+
+
+# ---- HERMES_TOKEN_OPT: compression summary ratio override ----
+# Auto-maintained by hermes-start.sh. Survives 'hermes update'.
+# To change: edit HERMES_COMPRESSION_SUMMARY_RATIO in hermes-start.sh
+_HOPT = os.environ.get("HERMES_COMPRESSION_SUMMARY_RATIO")
+if _HOPT:
+    try:
+        from agent import context_compressor as _cc
+        _cc._SUMMARY_RATIO = float(_HOPT)
+    except Exception:
+        pass
+# ---- END HERMES_TOKEN_OPT ----
+
 from urllib.parse import unquote, urlparse
 from contextlib import contextmanager
 from pathlib import Path

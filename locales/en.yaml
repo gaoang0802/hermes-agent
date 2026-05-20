@@ -411,3 +411,26 @@ run_agent:
   context_too_large: 🗜️ Context too large (~{tokens} tokens) — compressing ({attempt}/{max_attempts})...
   non_retryable_error_try_fallback: ⚠️ Non-retryable error (HTTP {status_code}) — trying fallback...
   non_retryable_error: '❌ Non-retryable error (HTTP {status_code}): {error}'
+  no_response_aborting: '⚠️ No response from provider for {elapsed}s (non-streaming, model: {model}). Aborting call.'
+  stream_malformed_data: '❌ Provider returned malformed streaming data after {attempts} attempts. The provider may be experiencing issues — try again in a moment.'
+  stream_connection_failed: '❌ Connection to provider failed after {attempts} attempts. The provider may be experiencing issues — try again in a moment.'
+  no_response_reconnecting: '⚠️ No response from provider for {elapsed}s (model: {model}, context: ~{context} tokens). Reconnecting...'
+  primary_failed_switch_fallback: '🔄 Primary model failed — switching to fallback: {fb_model} via {fb_provider}'
+  stale_connections_cleaned: 🔌 Detected stale connections from a previous provider issue — cleaned up automatically. Proceeding with fresh connection.
+  context_reduced_retrying: '🗜️ Context reduced to {reduced} tokens (was {old}), retrying...'
+  tool_guardrail_halted: '⚠️ Tool guardrail halted {tool_name}: {code}'
+  stream_interrupted_use_delivered: ↻ Stream interrupted — using delivered content as final response
+  iteration_budget_exhausted: '⚠️ Iteration budget exhausted ({api_call_count}/{max_iterations}) — asking model to summarise'
+  compression_provider_unavailable: "⚠ Configured auxiliary compression provider '{provider}' is unavailable — context compression will drop middle turns without a summary. Check auxiliary.compression in config.yaml and reauthenticate that provider."
+  compression_no_provider: ⚠ No auxiliary LLM provider configured — context compression will drop middle turns without a summary. Run `hermes setup` or set OPENROUTER_API_KEY.
+  compression_model_context_low: |-
+    ⚠ Compression model {aux_label} context is {aux_context} tokens, but the main model {main_label}'s compression threshold was {old_threshold} tokens. Auto-lowered this session's threshold to {new_threshold} tokens so compression can run.
+      To make this permanent, edit config.yaml — either:
+      1. Use a larger compression model:
+           auxiliary:
+             compression:
+               model: <model-with-{old_threshold}+-context>
+      2. Lower the compression threshold:
+           compression:
+             threshold: {safe_pct}
+  nous_rate_limit: '⏳ {nous_msg}'

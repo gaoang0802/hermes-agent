@@ -82,19 +82,10 @@ def check_compression_model_feasibility(agent: Any) -> None:
             _aux_cfg_provider = ""
         if client is None or not aux_model:
             if _aux_cfg_provider and _aux_cfg_provider != "auto":
-                msg = (
-                    "⚠ Configured auxiliary compression provider "
-                    f"'{_aux_cfg_provider}' is unavailable — context "
-                    "compression will drop middle turns without a summary. "
-                    "Check auxiliary.compression in config.yaml and "
-                    "reauthenticate that provider."
-                )
+                msg = t("run_agent.compression_provider_unavailable",
+                        provider=_aux_cfg_provider)
             else:
-                msg = (
-                    "⚠ No auxiliary LLM provider configured — context "
-                    "compression will drop middle turns without a summary. "
-                    "Run `hermes setup` or set OPENROUTER_API_KEY."
-                )
+                msg = t("run_agent.compression_no_provider")
             agent._compression_warning = msg
             agent._emit_status(msg)
             logger.warning(
@@ -193,22 +184,13 @@ def check_compression_model_feasibility(agent: Any) -> None:
                 else _main_model
             )
             _aux_label = f"{aux_model} ({_aux_provider_label})"
-            msg = (
-                f"⚠ Compression model {_aux_label} context is "
-                f"{aux_context:,} tokens, but the main model "
-                f"{_main_label}'s compression threshold was "
-                f"{old_threshold:,} tokens. "
-                f"Auto-lowered this session's threshold to "
-                f"{new_threshold:,} tokens so compression can run.\n"
-                f"  To make this permanent, edit config.yaml — either:\n"
-                f"  1. Use a larger compression model:\n"
-                f"       auxiliary:\n"
-                f"         compression:\n"
-                f"           model: <model-with-{old_threshold:,}+-context>\n"
-                f"  2. Lower the compression threshold:\n"
-                f"       compression:\n"
-                f"         threshold: 0.{safe_pct:02d}"
-            )
+            msg = t("run_agent.compression_model_context_low",
+                    aux_label=_aux_label,
+                    aux_context=f"{aux_context:,}",
+                    main_label=_main_label,
+                    old_threshold=f"{old_threshold:,}",
+                    new_threshold=f"{new_threshold:,}",
+                    safe_pct=f"0.{safe_pct:02d}")
             agent._compression_warning = msg
             agent._emit_status(msg)
             logger.warning(

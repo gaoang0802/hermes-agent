@@ -3282,19 +3282,10 @@ class AIAgent:
                 _aux_cfg_provider = ""
             if client is None or not aux_model:
                 if _aux_cfg_provider and _aux_cfg_provider != "auto":
-                    msg = (
-                        "⚠ Configured auxiliary compression provider "
-                        f"'{_aux_cfg_provider}' is unavailable — context "
-                        "compression will drop middle turns without a summary. "
-                        "Check auxiliary.compression in config.yaml and "
-                        "reauthenticate that provider."
-                    )
+                    msg = t("run_agent.compression_provider_unavailable",
+                            provider=_aux_cfg_provider)
                 else:
-                    msg = (
-                        "⚠ No auxiliary LLM provider configured — context "
-                        "compression will drop middle turns without a summary. "
-                        "Run `hermes setup` or set OPENROUTER_API_KEY."
-                    )
+                    msg = t("run_agent.compression_no_provider")
                 self._compression_warning = msg
                 self._emit_status(msg)
                 logger.warning(
@@ -3385,22 +3376,13 @@ class AIAgent:
                     else _main_model
                 )
                 _aux_label = f"{aux_model} ({_aux_provider_label})"
-                msg = (
-                    f"⚠ Compression model {_aux_label} context is "
-                    f"{aux_context:,} tokens, but the main model "
-                    f"{_main_label}'s compression threshold was "
-                    f"{old_threshold:,} tokens. "
-                    f"Auto-lowered this session's threshold to "
-                    f"{new_threshold:,} tokens so compression can run.\n"
-                    f"  To make this permanent, edit config.yaml — either:\n"
-                    f"  1. Use a larger compression model:\n"
-                    f"       auxiliary:\n"
-                    f"         compression:\n"
-                    f"           model: <model-with-{old_threshold:,}+-context>\n"
-                    f"  2. Lower the compression threshold:\n"
-                    f"       compression:\n"
-                    f"         threshold: 0.{safe_pct:02d}"
-                )
+                msg = t("run_agent.compression_model_context_low",
+                        aux_label=_aux_label,
+                        aux_context=f"{aux_context:,}",
+                        main_label=_main_label,
+                        old_threshold=f"{old_threshold:,}",
+                        new_threshold=f"{new_threshold:,}",
+                        safe_pct=f"0.{safe_pct:02d}")
                 self._compression_warning = msg
                 self._emit_status(msg)
                 logger.warning(
@@ -7875,9 +7857,9 @@ class AIAgent:
                     api_kwargs.get("model", "unknown"), f"{_est_ctx:,}",
                 )
                 self._emit_status(
-                    f"⚠️ No response from provider for {int(_elapsed)}s "
-                    f"(non-streaming, model: {api_kwargs.get('model', 'unknown')}). "
-                    f"Aborting call."
+                    t("run_agent.no_response_aborting",
+                      elapsed=int(_elapsed),
+                      model=api_kwargs.get("model", "unknown"))
                 )
                 try:
                     if self.api_mode == "anthropic_messages":
@@ -8780,17 +8762,13 @@ class AIAgent:
                             )
                             if _is_stream_parse_err:
                                 self._emit_status(
-                                    "❌ Provider returned malformed streaming data after "
-                                    f"{_max_stream_retries + 1} attempts. "
-                                    "The provider may be experiencing issues — "
-                                    "try again in a moment."
+                                    t("run_agent.stream_malformed_data",
+                                      attempts=_max_stream_retries + 1)
                                 )
                             else:
                                 self._emit_status(
-                                    "❌ Connection to provider failed after "
-                                    f"{_max_stream_retries + 1} attempts. "
-                                    "The provider may be experiencing issues — "
-                                    "try again in a moment."
+                                    t("run_agent.stream_connection_failed",
+                                      attempts=_max_stream_retries + 1)
                                 )
                         else:
                             _err_lower = str(e).lower()
@@ -8886,10 +8864,10 @@ class AIAgent:
                     api_kwargs.get("model", "unknown"), f"{_est_ctx:,}",
                 )
                 self._emit_status(
-                    f"⚠️ No response from provider for {int(_stale_elapsed)}s "
-                    f"(model: {api_kwargs.get('model', 'unknown')}, "
-                    f"context: ~{_est_ctx:,} tokens). "
-                    f"Reconnecting..."
+                    t("run_agent.no_response_reconnecting",
+                      elapsed=int(_stale_elapsed),
+                      model=api_kwargs.get("model", "unknown"),
+                      context=f"{_est_ctx:,}")
                 )
                 try:
                     rc = request_client_holder.get("client")
@@ -9208,8 +9186,8 @@ class AIAgent:
                 )
 
             self._emit_status(
-                f"🔄 Primary model failed — switching to fallback: "
-                f"{fb_model} via {fb_provider}"
+                t("run_agent.primary_failed_switch_fallback",
+                  fb_model=fb_model, fb_provider=fb_provider)
             )
             logging.info(
                 "Fallback activated: %s → %s (%s)",
@@ -12075,9 +12053,7 @@ class AIAgent:
             try:
                 if self._cleanup_dead_connections():
                     self._emit_status(
-                        "🔌 Detected stale connections from a previous provider "
-                        "issue — cleaned up automatically. Proceeding with fresh "
-                        "connection."
+                        t("run_agent.stale_connections_cleaned")
                     )
             except Exception:
                 pass
@@ -12767,7 +12743,7 @@ class AIAgent:
                                 f"{self.log_prefix}⏳ {_nous_msg} Trying fallback...",
                                 force=True,
                             )
-                            self._emit_status(f"⏳ {_nous_msg}")
+                            self._emit_status(t("run_agent.nous_rate_limit", nous_msg=_nous_msg))
                             if self._try_activate_fallback():
                                 retry_count = 0
                                 compression_attempts = 0
@@ -14141,8 +14117,9 @@ class AIAgent:
                             conversation_history = None
                             if len(messages) < original_len or old_ctx > _reduced_ctx:
                                 self._emit_status(
-                                    f"🗜️ Context reduced to {_reduced_ctx:,} tokens "
-                                    f"(was {old_ctx:,}), retrying..."
+                                    t("run_agent.context_reduced_retrying",
+                                      reduced=f"{_reduced_ctx:,}",
+                                      old=f"{old_ctx:,}")
                                 )
                                 time.sleep(2)
                                 restart_with_compressed_messages = True
@@ -15144,7 +15121,9 @@ class AIAgent:
                         _turn_exit_reason = "guardrail_halt"
                         final_response = self._toolguard_controlled_halt_response(decision)
                         self._emit_status(
-                            f"⚠️ Tool guardrail halted {decision.tool_name}: {decision.code}"
+                            t("run_agent.tool_guardrail_halted",
+                              tool_name=decision.tool_name,
+                              code=decision.code)
                         )
                         messages.append({"role": "assistant", "content": final_response})
                         break
@@ -15249,8 +15228,7 @@ class AIAgent:
                                 len(_recovered),
                             )
                             self._emit_status(
-                                "↻ Stream interrupted — using delivered content "
-                                "as final response"
+                                t("run_agent.stream_interrupted_use_delivered")
                             )
                             final_response = _recovered
                             self._response_was_previewed = True
@@ -15601,8 +15579,9 @@ class AIAgent:
             # user message and makes a single toolless request.
             _turn_exit_reason = f"max_iterations_reached({api_call_count}/{self.max_iterations})"
             self._emit_status(
-                f"⚠️ Iteration budget exhausted ({api_call_count}/{self.max_iterations}) "
-                "— asking model to summarise"
+                t("run_agent.iteration_budget_exhausted",
+                  api_call_count=api_call_count,
+                  max_iterations=self.max_iterations)
             )
             if not self.quiet_mode:
                 self._safe_print(

@@ -1,0 +1,7 @@
+name: siliconflow
+version: 1.0.0
+description: "SiliconFlow image generation backend (Kolors, free, Chinese prompt support)"
+author: custom
+kind: backend
+requires_env:
+  - SILICONFLOW_API_KEY
