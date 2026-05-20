@@ -54,7 +54,8 @@ LEGACY_SUMMARY_PREFIX = "[CONTEXT SUMMARY]:"
 # Minimum tokens for the summary output
 _MIN_SUMMARY_TOKENS = 2000
 # Proportion of compressed content to allocate for summary
-_SUMMARY_RATIO = 0.20
+# HERMES-PATCH: reduced from 0.20 to 0.08 to save ~¥9/day on compression output tokens
+_SUMMARY_RATIO = 0.08
 # Absolute ceiling for summary tokens (even on very large context windows)
 _SUMMARY_TOKENS_CEILING = 12_000
 
@@ -1744,5 +1745,16 @@ The user has requested that this compaction PRIORITISE preserving all informatio
                 savings_pct,
             )
             logger.info("Compression #%d complete", self.compression_count)
+            # HERMES-PATCH: efficiency ratio logging for cost optimization
+            content_tokens = estimate_messages_tokens_rough(turns_to_summarize)
+            budget = int(content_tokens * _SUMMARY_RATIO)
+            summary_tokens_est = max(_MIN_SUMMARY_TOKENS, min(budget, self.max_summary_tokens))
+            if summary_tokens_est > 0 and saved_estimate > 0:
+                efficiency = saved_estimate / summary_tokens_est
+                level = "🟢" if efficiency >= 5 else ("🟡" if efficiency >= 3 else "🔴")
+                logger.info(
+                    "Compression efficiency: %s %.1f:1 (saved=%d input, cost=%d output tokens)",
+                    level, efficiency, saved_estimate, summary_tokens_est,
+                )
 
         return compressed
