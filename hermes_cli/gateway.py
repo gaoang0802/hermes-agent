@@ -3198,10 +3198,10 @@ def run_gateway(verbose: int = 0, quiet: bool = False, replace: bool = False):
     from gateway.run import start_gateway
     
     print("┌─────────────────────────────────────────────────────────┐")
-    print("│           ⚕ Hermes Gateway Starting...                 │")
+    print("│                 ⚕ Hermes 网关启动中…                    │")
     print("├─────────────────────────────────────────────────────────┤")
-    print("│  Messaging platforms + cron scheduler                    │")
-    print("│  Press Ctrl+C to stop                                   │")
+    print("│  消息平台 + 定时任务调度                                │")
+    print("│  Ctrl+C 停止                                            │")
     print("└─────────────────────────────────────────────────────────┘")
     print()
     
