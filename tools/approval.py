@@ -18,6 +18,7 @@ import time
 import unicodedata
 from typing import Optional
 from hermes_cli.config import cfg_get
+from agent.i18n import t
 
 from utils import env_var_enabled, is_truthy_value
 
@@ -57,6 +58,21 @@ def _fire_approval_hook(hook_name: str, **kwargs) -> None:
         # flow is safety-critical, plugin observability is not.
         logger.debug("Approval hook %s dispatch failed: %s", hook_name, exc)
 
+
+def _tdesc(description: str) -> str:
+    """Translate a dangerous pattern description for user-facing display.
+
+    Falls back to English (the description itself) when the key doesn't exist
+    in the active language catalog.
+    """
+    key = f"approval.patterns.{description}"
+    try:
+        result = t(key)
+        # t() falls back to the raw key path if neither zh nor en has it.
+        # If result == key, the key wasn't found anywhere => use English.
+        return description if result == key else result
+    except Exception:
+        return description
 
 
 def set_current_session_key(session_key: str) -> contextvars.Token[str]:
@@ -756,7 +772,7 @@ def prompt_dangerous_approval(command: str, description: str,
         from agent.i18n import t
         while True:
             print()
-            print(f"  {t('approval.dangerous_header', description=description)}")
+            print(f"  {t('approval.dangerous_header', description=_tdesc(description))}")
             print(f"      {command}")
             print()
             if allow_permanent:
@@ -961,7 +977,7 @@ def check_dangerous_command(command: str, env_type: str,
                 return {
                     "approved": False,
                     "message": (
-                        f"BLOCKED: Command flagged as dangerous ({description}) "
+                        f"BLOCKED: Command flagged as dangerous ({_tdesc(description)}) "
                         "but cron jobs run without a user present to approve it. "
                         "Find an alternative approach that avoids this command. "
                         "To allow dangerous commands in cron jobs, set "
@@ -983,7 +999,7 @@ def check_dangerous_command(command: str, env_type: str,
             "command": command,
             "description": description,
             "message": (
-                f"⚠️ This command is potentially dangerous ({description}). "
+                f"⚠️ This command is potentially dangerous ({_tdesc(description)}). "
                 f"Asking the user for approval.\n\n**Command:**\n```\n{command}\n```"
             ),
         }
@@ -994,7 +1010,7 @@ def check_dangerous_command(command: str, env_type: str,
     if choice == "deny":
         return {
             "approved": False,
-            "message": f"BLOCKED: User denied this potentially dangerous command (matched '{description}' pattern). Do NOT retry this command - the user has explicitly rejected it.",
+            "message": f"BLOCKED: User denied this potentially dangerous command (matched '{_tdesc(description)}' pattern). Do NOT retry this command - the user has explicitly rejected it.",
             "pattern_key": pattern_key,
             "description": description,
         }
@@ -1095,7 +1111,7 @@ def check_all_command_guards(command: str, env_type: str,
                     return {
                         "approved": False,
                         "message": (
-                            f"BLOCKED: Command flagged as dangerous ({description}) "
+                            f"BLOCKED: Command flagged as dangerous ({_tdesc(description)}) "
                             "but cron jobs run without a user present to approve it. "
                             "Find an alternative approach that avoids this command. "
                             "To allow dangerous commands in cron jobs, set "

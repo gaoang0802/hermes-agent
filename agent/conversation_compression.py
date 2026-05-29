@@ -415,8 +415,7 @@ def compress_context(
     _cc = agent.context_compressor.compression_count
     if _cc >= 2:
         agent._vprint(
-            f"{agent.log_prefix}⚠️  Session compressed {_cc} times — "
-            f"accuracy may degrade. Consider /new to start fresh.",
+            t("run_agent.compressed_warning", count=_cc),
             force=True,
         )
 

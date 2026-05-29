@@ -109,6 +109,7 @@ from agent.markdown_tables import (
 # NOTE: `from agent.account_usage import ...` is deliberately NOT at module
 # top — it transitively pulls the OpenAI SDK chain (~230 ms cold) and is only
 # needed when the user runs `/limits`. Lazy-imported inside the handler below.
+from agent.i18n import t
 from hermes_cli.banner import _format_context_length, format_banner_version_label
 
 _COMMAND_SPINNER_FRAMES = ("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
@@ -10769,17 +10770,18 @@ class HermesCLI:
         selected = state.get("selected", 0)
         show_full = state.get("show_full", False)
 
-        title = "⚠️  Dangerous Command"
+        title = t("approval.panel.title")
         cmd_display = command if show_full or len(command) <= 70 else command[:70] + '...'
         choice_labels = {
-            "once": "Allow once",
-            "session": "Allow for this session",
-            "always": "Add to permanent allowlist",
-            "deny": "Deny",
-            "view": "Show full command",
+            "once": t("approval.panel.allow_once"),
+            "session": t("approval.panel.allow_session"),
+            "always": t("approval.panel.allow_always"),
+            "deny": t("approval.panel.deny"),
+            "view": t("approval.panel.show_full"),
         }
 
-        preview_lines = _wrap_panel_text(description, 60)
+        desc_display = t(f"approval.patterns.{description}")
+        preview_lines = _wrap_panel_text(desc_display, 60)
         preview_lines.extend(_wrap_panel_text(cmd_display, 60))
         for i, choice in enumerate(choices):
             prefix = '❯ ' if i == selected else '  '

@@ -4459,13 +4459,18 @@ class AIAgent:
                     summary = " · ".join(dict.fromkeys(actions))
                     self._safe_print(f"  {t('run_agent.self_improvement_review', summary=summary)}")
                     _bg_cb = self.background_review_callback
-                    if _bg_cb:
+                    if _bg_cb and callable(_bg_cb):
                         try:
                             _bg_cb(
                                 f"💾 Self-improvement review: {summary}"
                             )
                         except Exception:
                             pass
+                    elif _bg_cb:
+                        logger.debug(
+                            "background_review_callback is not callable (type=%s) — skipping summary delivery",
+                            type(_bg_cb).__name__,
+                        )
 
             except Exception as e:
                 logger.warning("Background memory/skill review failed: %s", e)
