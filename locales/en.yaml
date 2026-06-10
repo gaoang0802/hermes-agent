@@ -237,9 +237,12 @@ gateway:
     no_named_sessions:     "No named sessions found.\nUse `/title My Session` to name your current session, then `/resume My Session` to return to it later."
     list_header:           "📋 **Named Sessions**\n"
     list_item:             "• **{title}**{preview_part}"
+    list_item_numbered:    "{index}. **{title}**{preview_part}"
     list_preview_suffix:   " — _{preview}_"
     list_footer:           "\nUsage: `/resume <session name>`"
+    list_footer_numbered:  "\nUsage: `/resume <session name>` or `/resume <number>` (e.g. `/resume 1` for the most recent)"
     list_failed:           "Could not list sessions: {error}"
+    out_of_range:          "Resume index {index} is out of range.\nUse `/resume` with no arguments to see available sessions."
     not_found:             "No session found matching '**{name}**'.\nUse `/resume` with no arguments to see available sessions."
     already_on:            "📌 Already on session **{name}**."
     switch_failed:         "Failed to switch session."
@@ -267,7 +270,7 @@ gateway:
     title:                 "**Title:** {title}"
     created:               "**Created:** {timestamp}"
     last_activity:         "**Last Activity:** {timestamp}"
-    tokens:                "**Tokens:** {tokens}"
+    tokens:                "**Cumulative API tokens (re-sent each call):** {tokens}"
     agent_running:         "**Agent Running:** {state}"
     state_yes:             "Yes ⚡"
     state_no:              "No"
@@ -302,7 +305,8 @@ gateway:
 
   undo:
     nothing:               "Nothing to undo."
-    removed:               "↩️ Undid {count} message(s).\nRemoved: \"{preview}\""
+    removed:               "↩️ Undid {turns} turn(s) ({count} message(s)).\nBacked up to: \"{preview}\"\nCopy/edit the text above and send it to re-prompt from here."
+    invalid_count:         "Invalid count \"{arg}\" — use /undo or /undo N."
 
   update:
     platform_not_messaging:  "✗ /update is only available from messaging platforms. Run `hermes update` from the terminal."
@@ -354,6 +358,8 @@ gateway:
     label_off:             "Off (text only)"
     label_voice_only:      "On (voice reply to voice messages)"
     label_all:             "TTS (voice reply to all messages)"
+    help:                  "{toggle}\n\n**How /voice works**\n• `/voice on` — voice reply when you send a voice message\n• `/voice tts` — voice reply to *every* message\n• `/voice off` — back to text-only replies\n• `/voice status` — show the current mode\n• `/voice` (no argument) — quick toggle between on and off{channels}"
+    help_channels:         "\n\n**Live voice channels (Discord)**\n• Join a voice channel first, then `/voice channel` — I'll join, listen, and speak my replies\n• `/voice leave` — disconnect from the voice channel"
 
   yolo:
     disabled:                   "⚠️ YOLO mode **OFF** for this session — dangerous commands will require approval."
@@ -364,146 +370,3 @@ gateway:
     session_db_unavailable_prefix: "Session database not available"
     session_not_found:           "Session not found in database."
     warn_passthrough:            "⚠️ {error}"
-  approval_text_prompt: "⚠️ **Dangerous command requires approval:**\n```\n{command}\n```\nReason: {reason}\n\nReply `/approve` to execute, `/approve session` to approve this pattern for the session, `/approve always` to approve permanently, or `/deny` to cancel."
-  queued_next_turn: ⏳ Queued for the next turn{status_detail}. I'll respond once the current task finishes.
-  interrupting_current_task: ⚡ Interrupting current task{status_detail}. I'll respond to your message shortly.
-  model_no_response: ⚠️ The model returned no response after processing tool results. This can happen with some models — try again or rephrase your question.
-  still_working: ⏳ Still working... ({elapsed} min elapsed{status_detail})
-  status_elapsed: '{elapsed_min} min elapsed'
-  status_iteration: 'iteration {iteration}/{max_iter}'
-  status_running: 'running: {tool}'
-  shutdown_notice: ⚠️ Gateway shutting down — Your current task will be interrupted.
-  restart_notice: ⚠️ Gateway restarting — Your current task will be interrupted. Send any message after restart and I'll try to resume where you left off.
-run_agent:
-  compacting_context: 🗜️ Compacting context — summarizing earlier conversation so I can continue...
-  compacting_context_short: ⟳ compacting context…
-  preflight_compression: '📦 Preflight compression: ~{tokens} tokens >= {threshold} threshold. This may take a moment.'
-  stream_reconnect: ⚠️ {provider} stream {kind} ({error_type}){suffix} — reconnecting, retry {attempt}/{max_attempts}
-  auxiliary_failed: '⚠ Auxiliary {task} failed: {detail}'
-  aux_task_background_review: background review
-  aux_task_title_generation: title generation
-  self_improvement_review: '💾 Self-improvement review: {summary}'
-  compression_aborted: '⚠ Compression aborted: {error}. No messages were dropped — conversation continues unchanged. Run /compress to retry, or /new to start a fresh session.'
-  compression_summary_failed: '⚠ Compression summary failed: {error}. Inserted a fallback context marker.'
-  compression_aux_failed: "ℹ Configured compression model '{model}' failed ({error}). Recovered using main model — check auxiliary.compression.model in config.yaml."
-  tool_completed: 'tool completed: {name} ({duration}s)'
-  empty_malformed_response: ⚠️ Empty/malformed response — switching to fallback...
-  max_retries_invalid_try_fallback: ⚠️ Max retries ({max_retries}) for invalid responses — trying fallback...
-  max_retries_invalid_giving_up: ❌ Max retries ({max_retries}) exceeded for invalid responses. Giving up.
-  retrying_in: ⏳ Retrying in {wait_time}s ({hint})...
-  response_truncated: ⚠️ Response truncated (finish_reason='length') - model hit max output tokens
-  max_retries_exhausted_try_fallback: ⚠️ Max retries ({max_retries}) exhausted — trying fallback...
-  rate_limited_after_retries: ❌ Rate limited after {max_retries} retries — {summary}
-  api_failed_after_retries: ❌ API failed after {max_retries} retries — {summary}
-  rate_limited_waiting: ⏱️ Rate limited. Waiting {wait_time}s (attempt {attempt}/{max_retries})...
-  retrying_in_attempt: ⏳ Retrying in {wait_time}s (attempt {attempt}/{max_retries})...
-  empty_response_after_tool_calls: ↻ Empty response after tool calls — using earlier content as final answer
-  empty_after_tool_calls_nudge: ⚠️ Model returned empty after tool calls — nudging to continue
-  thinking_only_prefilling: ↻ Thinking-only response — prefilling to continue ({attempt}/2)
-  empty_response_retrying: ⚠️ Empty response from model — retrying ({attempt}/3)
-  empty_response_switch_fallback: ⚠️ Model returning empty responses — switching to fallback provider...
-  switched_to_fallback: '↻ Switched to fallback: {model} ({provider})'
-  reasoning_no_visible: ⚠️ Model produced reasoning but no visible response after all retries. Returning empty.
-  no_content_after_retries: ❌ Model returned no content after all retries{suffix}
-  rate_limited_switch_fallback: ⚠️ Rate limited — switching to fallback provider...
-  payload_too_large: ⚠️ Request payload too large (413) — compression attempt {attempt}/{max_attempts}...
-  compressed_retrying: 🗜️ Compressed {original} → {compressed} messages, retrying...
-  context_too_large: 🗜️ Context too large (~{tokens} tokens) — compressing ({attempt}/{max_attempts})...
-  non_retryable_error_try_fallback: ⚠️ Non-retryable error (HTTP {status_code}) — trying fallback...
-  non_retryable_error: '❌ Non-retryable error (HTTP {status_code}): {error}'
-  no_response_aborting: '⚠️ No response from provider for {elapsed}s (non-streaming, model: {model}). Aborting call.'
-  stream_malformed_data: '❌ Provider returned malformed streaming data after {attempts} attempts. The provider may be experiencing issues — try again in a moment.'
-  stream_connection_failed: '❌ Connection to provider failed after {attempts} attempts. The provider may be experiencing issues — try again in a moment.'
-  no_response_reconnecting: '⚠️ No response from provider for {elapsed}s (model: {model}, context: ~{context} tokens). Reconnecting...'
-  primary_failed_switch_fallback: '🔄 Primary model failed — switching to fallback: {fb_model} via {fb_provider}'
-  stale_connections_cleaned: 🔌 Detected stale connections from a previous provider issue — cleaned up automatically. Proceeding with fresh connection.
-  context_reduced_retrying: '🗜️ Context reduced to {reduced} tokens (was {old}), retrying...'
-  tool_guardrail_halted: '⚠️ Tool guardrail halted {tool_name}: {code}'
-  stream_interrupted_use_delivered: ↻ Stream interrupted — using delivered content as final response
-  iteration_budget_exhausted: '⚠️ Iteration budget exhausted ({api_call_count}/{max_iterations}) — asking model to summarise'
-  compression_provider_unavailable: "⚠ Configured auxiliary compression provider '{provider}' is unavailable — context compression will drop middle turns without a summary. Check auxiliary.compression in config.yaml and reauthenticate that provider."
-  compression_no_provider: ⚠ No auxiliary LLM provider configured — context compression will drop middle turns without a summary. Run `hermes setup` or set OPENROUTER_API_KEY.
-  compression_model_context_low: |-
-    ⚠ Compression model {aux_label} context is {aux_context} tokens, but the main model {main_label}'s compression threshold was {old_threshold} tokens. Auto-lowered this session's threshold to {new_threshold} tokens so compression can run.
-      To make this permanent, edit config.yaml — either:
-      1. Use a larger compression model:
-           auxiliary:
-             compression:
-               model: <model-with-{old_threshold}+-context>
-      2. Lower the compression threshold:
-           compression:
-             threshold: {safe_pct}
-  nous_rate_limit: '⏳ {nous_msg}'
-  compressed_warning: "⚠️  Session compressed {count} times — accuracy may degrade. Consider /new to start fresh."
-
-approval:
-  panel:
-    title: "⚠️  Dangerous Command"
-    allow_once: "Allow once"
-    allow_session: "Allow for this session"
-    allow_always: "Add to permanent allowlist"
-    deny: "Deny"
-    show_full: "Show full command"
-    choice_header: "      [o]nce  |  [s]ession  |  [a]lways  |  [d]eny  |  [v]iew"
-  patterns:
-    "recursive delete of root filesystem": "recursive delete of root filesystem"
-    "recursive delete of system directory": "recursive delete of system directory"
-    "recursive delete of home directory": "recursive delete of home directory"
-    "format filesystem (mkfs)": "format filesystem (mkfs)"
-    "dd to raw block device": "dd to raw block device"
-    "redirect to raw block device": "redirect to raw block device"
-    "fork bomb": "fork bomb"
-    "kill all processes": "kill all processes"
-    "system shutdown/reboot": "system shutdown/reboot"
-    "init 0/6 (shutdown/reboot)": "init 0/6 (shutdown/reboot)"
-    "systemctl poweroff/reboot": "systemctl poweroff/reboot"
-    "telinit 0/6 (shutdown/reboot)": "telinit 0/6 (shutdown/reboot)"
-    "delete in root path": "delete in root path"
-    "recursive delete": "recursive delete"
-    "recursive delete (long flag)": "recursive delete (long flag)"
-    "world/other-writable permissions": "world/other-writable permissions"
-    "recursive world/other-writable (long flag)": "recursive world/other-writable (long flag)"
-    "recursive chown to root": "recursive chown to root"
-    "recursive chown to root (long flag)": "recursive chown to root (long flag)"
-    "format filesystem": "format filesystem"
-    "disk copy": "disk copy"
-    "write to block device": "write to block device"
-    "SQL DROP": "SQL DROP"
-    "SQL DELETE without WHERE": "SQL DELETE without WHERE"
-    "SQL TRUNCATE": "SQL TRUNCATE"
-    "overwrite system config": "overwrite system config"
-    "stop/restart system service": "stop/restart system service"
-    "force kill processes": "force kill processes"
-    "force kill processes (killall -KILL)": "force kill processes (killall -KILL)"
-    "force kill processes (killall -s KILL)": "force kill processes (killall -s KILL)"
-    "kill processes by regex (killall -r)": "kill processes by regex (killall -r)"
-    "shell command via -c/-lc flag": "shell command via -c/-lc flag"
-    "script execution via -e/-c flag": "script execution via -e/-c flag"
-    "pipe remote content to shell": "pipe remote content to shell"
-    "execute remote script via process substitution": "execute remote script via process substitution"
-    "overwrite system file via tee": "overwrite system file via tee"
-    "overwrite system file via redirection": "overwrite system file via redirection"
-    "overwrite project env/config via tee": "overwrite project env/config via tee"
-    "overwrite project env/config via redirection": "overwrite project env/config via redirection"
-    "xargs with rm": "xargs with rm"
-    "find -exec/-execdir rm": "find -exec/-execdir rm"
-    "find -delete": "find -delete"
-    "stop/restart hermes gateway (kills running agents)": "stop/restart hermes gateway (kills running agents)"
-    "hermes update (restarts gateway, kills running agents)": "hermes update (restarts gateway, kills running agents)"
-    "start gateway outside systemd (use 'systemctl --user restart hermes-gateway')": "start gateway outside systemd (use 'systemctl --user restart hermes-gateway')"
-    "kill hermes/gateway process (self-termination)": "kill hermes/gateway process (self-termination)"
-    "kill process via pgrep expansion (self-termination)": "kill process via pgrep expansion (self-termination)"
-    "kill process via backtick pgrep expansion (self-termination)": "kill process via backtick pgrep expansion (self-termination)"
-    "copy/move file into system config path": "copy/move file into system config path"
-    "overwrite project env/config file": "overwrite project env/config file"
-    "in-place edit of system config": "in-place edit of system config"
-    "in-place edit of system config (long flag)": "in-place edit of system config (long flag)"
-    "script execution via heredoc": "script execution via heredoc"
-    "git reset --hard (destroys uncommitted changes)": "git reset --hard (destroys uncommitted changes)"
-    "git force push (rewrites remote history)": "git force push (rewrites remote history)"
-    "git force push short flag (rewrites remote history)": "git force push short flag (rewrites remote history)"
-    "git clean with force (deletes untracked files)": "git clean with force (deletes untracked files)"
-    "git branch force delete": "git branch force delete"
-    "chmod +x followed by immediate execution": "chmod +x followed by immediate execution"
-    "sudo with privilege flag (stdin/askpass/shell/list)": "sudo with privilege flag (stdin/askpass/shell/list)"
-    "sudo with combined-flag privilege escalation": "sudo with combined-flag privilege escalation"

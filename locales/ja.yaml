@@ -222,9 +222,12 @@ gateway:
     no_named_sessions:     "名前付きセッションが見つかりません。\n`/title セッション名` で現在のセッションに名前を付けると、後で `/resume セッション名` で戻れます。"
     list_header:           "📋 **名前付きセッション**\n"
     list_item:             "• **{title}**{preview_part}"
+    list_item_numbered:    "{index}. **{title}**{preview_part}"
     list_preview_suffix:   " — _{preview}_"
     list_footer:           "\n使い方: `/resume <セッション名>`"
+    list_footer_numbered:  "\n使い方: `/resume <セッション名>` または `/resume <番号>`（例: 最新のセッションには `/resume 1`）"
     list_failed:           "セッションを一覧表示できませんでした: {error}"
+    out_of_range:          "再開インデックス {index} は範囲外です。\n引数なしで `/resume` を実行すると、利用可能なセッションが表示されます。"
     not_found:             "'**{name}**' に一致するセッションが見つかりません。\n引数なしで `/resume` を実行すると利用可能なセッションを表示します。"
     already_on:            "📌 既にセッション **{name}** にいます。"
     switch_failed:         "セッションの切り替えに失敗しました。"
@@ -287,7 +290,8 @@ gateway:
 
   undo:
     nothing:               "元に戻せる操作がありません。"
-    removed:               "↩️ {count} 件のメッセージを取り消しました。\n削除: 「{preview}」"
+    removed:               "↩️ {turns} ターンを取り消しました（{count} 件のメッセージ）。\nバックアップ先: 「{preview}」\n上のテキストをコピー／編集して送信すると、ここから再入力できます。"
+    invalid_count:         "無効な数値「{arg}」— /undo または /undo N を使用してください。"
 
   update:
     platform_not_messaging:  "✗ /update はメッセージングプラットフォームでのみ利用可能です。ターミナルで `hermes update` を実行してください。"
@@ -339,6 +343,8 @@ gateway:
     label_off:             "オフ (テキストのみ)"
     label_voice_only:      "オン (音声メッセージにのみ音声で返信)"
     label_all:             "TTS (すべてのメッセージに音声で返信)"
+    help:                  "{toggle}\n\n**/voice の使い方**\n• `/voice on` — 音声メッセージを送ると音声で返信\n• `/voice tts` — *すべての*メッセージに音声で返信\n• `/voice off` — テキストのみの返信に戻す\n• `/voice status` — 現在のモードを表示\n• `/voice`（引数なし）— オンとオフをすばやく切り替え{channels}"
+    help_channels:         "\n\n**ライブ音声チャンネル (Discord)**\n• 先に音声チャンネルに参加してから `/voice channel` — 参加して聞き取り、音声で返信します\n• `/voice leave` — 音声チャンネルから切断"
 
   yolo:
     disabled:                   "⚠️ このセッションの YOLO モードは **OFF** — 危険なコマンドには承認が必要です。"
@@ -349,64 +355,3 @@ gateway:
     session_db_unavailable_prefix: "セッションデータベースが利用できません"
     session_not_found:           "データベースにセッションが見つかりません。"
     warn_passthrough:            "⚠️ {error}"
-  approval_text_prompt: "⚠️ **Dangerous command requires approval:**\n```\n{command}\n```\nReason: {reason}\n\nReply `/approve` to execute, `/approve session` to approve this pattern for the session, `/approve always` to approve permanently, or `/deny` to cancel."
-  queued_next_turn: ⏳ Queued for the next turn{status_detail}. I'll respond once the current task finishes.
-  interrupting_current_task: ⚡ Interrupting current task{status_detail}. I'll respond to your message shortly.
-  model_no_response: ⚠️ The model returned no response after processing tool results. This can happen with some models — try again or rephrase your question.
-  still_working: ⏳ Still working... ({elapsed} min elapsed{status_detail})
-  status_elapsed: '{elapsed_min} min elapsed'
-  status_iteration: 'iteration {iteration}/{max_iter}'
-  status_running: 'running: {tool}'
-  shutdown_notice: ⚠️ Gateway shutting down — Your current task will be interrupted.
-  restart_notice: ⚠️ Gateway restarting — Your current task will be interrupted. Send any message after restart and I'll try to resume where you left off.
-run_agent:
-  compacting_context: 🗜️ Compacting context — summarizing earlier conversation so I can continue...
-  compacting_context_short: ⟳ compacting context…
-  preflight_compression: '📦 Preflight compression: ~{tokens} tokens >= {threshold} threshold. This may take a moment.'
-  stream_reconnect: ⚠️ {provider} stream {kind} ({error_type}){suffix} — reconnecting, retry {attempt}/{max_attempts}
-  auxiliary_failed: '⚠ Auxiliary {task} failed: {detail}'
-  aux_task_background_review: background review
-  aux_task_title_generation: title generation
-  self_improvement_review: '💾 Self-improvement review: {summary}'
-  compression_aborted: '⚠ Compression aborted: {error}. No messages were dropped — conversation continues unchanged. Run /compress to retry, or /new to start a fresh session.'
-  compression_summary_failed: '⚠ Compression summary failed: {error}. Inserted a fallback context marker.'
-  compression_aux_failed: "ℹ Configured compression model '{model}' failed ({error}). Recovered using main model — check auxiliary.compression.model in config.yaml."
-  tool_completed: 'tool completed: {name} ({duration}s)'
-  empty_malformed_response: ⚠️ Empty/malformed response — switching to fallback...
-  max_retries_invalid_try_fallback: ⚠️ Max retries ({max_retries}) for invalid responses — trying fallback...
-  max_retries_invalid_giving_up: ❌ Max retries ({max_retries}) exceeded for invalid responses. Giving up.
-  retrying_in: ⏳ Retrying in {wait_time}s ({hint})...
-  response_truncated: ⚠️ Response truncated (finish_reason='length') - model hit max output tokens
-  max_retries_exhausted_try_fallback: ⚠️ Max retries ({max_retries}) exhausted — trying fallback...
-  rate_limited_after_retries: ❌ Rate limited after {max_retries} retries — {summary}
-  api_failed_after_retries: ❌ API failed after {max_retries} retries — {summary}
-  rate_limited_waiting: ⏱️ Rate limited. Waiting {wait_time}s (attempt {attempt}/{max_retries})...
-  retrying_in_attempt: ⏳ Retrying in {wait_time}s (attempt {attempt}/{max_retries})...
-  empty_response_after_tool_calls: ↻ Empty response after tool calls — using earlier content as final answer
-  empty_after_tool_calls_nudge: ⚠️ Model returned empty after tool calls — nudging to continue
-  thinking_only_prefilling: ↻ Thinking-only response — prefilling to continue ({attempt}/2)
-  empty_response_retrying: ⚠️ Empty response from model — retrying ({attempt}/3)
-  empty_response_switch_fallback: ⚠️ Model returning empty responses — switching to fallback provider...
-  switched_to_fallback: '↻ Switched to fallback: {model} ({provider})'
-  reasoning_no_visible: ⚠️ Model produced reasoning but no visible response after all retries. Returning empty.
-  no_content_after_retries: ❌ Model returned no content after all retries{suffix}
-  rate_limited_switch_fallback: ⚠️ Rate limited — switching to fallback provider...
-  payload_too_large: ⚠️ Request payload too large (413) — compression attempt {attempt}/{max_attempts}...
-  compressed_retrying: 🗜️ Compressed {original} → {compressed} messages, retrying...
-  context_too_large: 🗜️ Context too large (~{tokens} tokens) — compressing ({attempt}/{max_attempts})...
-  non_retryable_error_try_fallback: ⚠️ Non-retryable error (HTTP {status_code}) — trying fallback...
-  non_retryable_error: '❌ Non-retryable error (HTTP {status_code}): {error}'
-  no_response_aborting: '⚠️ No response from provider for {elapsed}s (non-streaming, model: {model}). Aborting call.'
-  stream_malformed_data: '❌ Provider returned malformed streaming data after {attempts} attempts. The provider may be experiencing issues — try again in a moment.'
-  stream_connection_failed: '❌ Connection to provider failed after {attempts} attempts. The provider may be experiencing issues — try again in a moment.'
-  no_response_reconnecting: '⚠️ No response from provider for {elapsed}s (model: {model}, context: ~{context} tokens). Reconnecting...'
-  primary_failed_switch_fallback: '🔄 Primary model failed — switching to fallback: {fb_model} via {fb_provider}'
-  stale_connections_cleaned: 🔌 Detected stale connections from a previous provider issue — cleaned up automatically. Proceeding with fresh connection.
-  context_reduced_retrying: '🗜️ Context reduced to {reduced} tokens (was {old}), retrying...'
-  tool_guardrail_halted: '⚠️ Tool guardrail halted {tool_name}: {code}'
-  stream_interrupted_use_delivered: ↻ Stream interrupted — using delivered content as final response
-  iteration_budget_exhausted: '⚠️ Iteration budget exhausted ({api_call_count}/{max_iterations}) — asking model to summarise'
-  compression_provider_unavailable: "⚠ Configured auxiliary compression provider '{provider}' is unavailable — context compression will drop middle turns without a summary. Check auxiliary.compression in config.yaml and reauthenticate that provider."
-  compression_no_provider: ⚠ No auxiliary LLM provider configured — context compression will drop middle turns without a summary. Run `hermes setup` or set OPENROUTER_API_KEY.
-  compression_model_context_low: |-
-  nous_rate_limit: '⏳ {nous_msg}'
