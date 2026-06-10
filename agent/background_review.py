@@ -23,6 +23,7 @@ import json
 import logging
 import os
 from typing import Any, Dict, List, Optional
+from agent.i18n import t
 
 logger = logging.getLogger(__name__)
 
@@ -286,13 +287,13 @@ def summarize_background_review_actions(
         elif "updated" in message.lower():
             actions.append(message)
         elif "added" in message.lower() or (target and "add" in message.lower()):
-            label = "Memory" if target == "memory" else "User profile" if target == "user" else target
+            label = t("approval.label_memory") if target == "memory" else t("approval.label_user_profile") if target == "user" else target
             actions.append(f"{label} updated")
         elif "Entry added" in message:
-            label = "Memory" if target == "memory" else "User profile" if target == "user" else target
+            label = t("approval.label_memory") if target == "memory" else t("approval.label_user_profile") if target == "user" else target
             actions.append(f"{label} updated")
         elif "removed" in message.lower() or "replaced" in message.lower():
-            label = "Memory" if target == "memory" else "User profile" if target == "user" else target
+            label = t("approval.label_memory") if target == "memory" else t("approval.label_user_profile") if target == "user" else target
             actions.append(f"{label} updated")
     return actions
 
@@ -527,13 +528,13 @@ def _run_review_in_thread(
         if actions:
             summary = " · ".join(dict.fromkeys(actions))
             agent._safe_print(
-                f"  💾 Self-improvement review: {summary}"
+                t("approval.self_improvement_review", summary=summary)
             )
             _bg_cb = agent.background_review_callback
             if _bg_cb:
                 try:
                     _bg_cb(
-                        f"💾 Self-improvement review: {summary}"
+                        t("approval.self_improvement_review", summary=summary)
                     )
                 except Exception:
                     pass

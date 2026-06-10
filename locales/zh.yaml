@@ -14,9 +14,17 @@ approval:
   denied:          "      ✗ 已拒绝"
   cancelled:       "      ✗ 已取消"
   blocklist_message: "此命令位于无条件拦截列表中，无法被批准。"
+  dialog_text: "⚠️ **危险命令需要审批：**\n```\n{cmd}\n```\n原因：{desc}\n\n回复 `/approve` 执行，`/approve session` 本次会话内允许，`/approve always` 永久允许，或 `/deny` 拒绝。"
+  self_improvement_review: "  💾 自我改进：{summary}"
+  label_memory: "记忆"
+  label_user_profile: "用户资料"
 
 gateway:
   approval_expired: "⚠️ 批准已过期（代理不再等待）。请让代理重试。"
+  steered_into_run: "⏩ 已切入当前会话{status_detail}。你的消息将在下一步工具调用后到达。"
+  subagent_queued: "⏳ 子代理正在工作{status_detail} — 你的消息已排队，等完成后处理（使用 /stop 取消全部）。"
+  shutdown_restart: "⚠️ 网关重启中 — 你当前的任务将被中断。重启后发消息，我会尝试恢复。"
+  shutdown_stop: "⚠️ 网关关闭中 — 你当前的任务将被中断。"
   draining:         "⏳ 正在等待 {count} 个活跃代理结束后重启..."
   goal_cleared:     "✓ 目标已清除。"
   no_active_goal:   "当前没有活跃的目标。"

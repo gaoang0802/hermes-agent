@@ -3747,18 +3747,12 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
 
         status_detail = f" ({', '.join(status_parts)})" if status_parts else ""
         if is_steer_mode:
-            message = (
-                f"⏩ Steered into current run{status_detail}. "
-                f"Your message arrives after the next tool call."
-            )
+            message = t("gateway.steered_into_run", status_detail=status_detail)
         elif is_queue_mode and demoted_for_subagents:
             # #30170 — explain the demotion so the user knows their
             # follow-up didn't accidentally kill the subagent and
             # discovers `/stop` as the explicit escape hatch.
-            message = (
-                f"⏳ Subagent working{status_detail} — your message is queued for "
-                f"when it finishes (use /stop to cancel everything)."
-            )
+            message = t("gateway.subagent_queued", status_detail=status_detail)
         elif is_queue_mode:
             message = (
                 f"⏳ Queued for the next turn{status_detail}. "
@@ -3867,14 +3861,7 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
         active = self._snapshot_running_agents()
         restart_source = self._restart_command_source if self._restart_requested else None
 
-        action = "restarting" if self._restart_requested else "shutting down"
-        hint = (
-            "Your current task will be interrupted. "
-            "Send any message after restart and I'll try to resume where you left off."
-            if self._restart_requested
-            else "Your current task will be interrupted."
-        )
-        msg = f"⚠️ Gateway {action} — {hint}"
+        msg = t("gateway.shutdown_restart") if self._restart_requested else t("gateway.shutdown_stop")
 
         notified: set[tuple[str, str, Optional[str]]] = set()
         for session_key in active:
@@ -14097,13 +14084,7 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
 
                 # Fallback: plain text approval prompt
                 cmd_preview = cmd[:200] + "..." if len(cmd) > 200 else cmd
-                msg = (
-                    f"⚠️ **Dangerous command requires approval:**\n"
-                    f"```\n{cmd_preview}\n```\n"
-                    f"Reason: {desc}\n\n"
-                    f"Reply `/approve` to execute, `/approve session` to approve this pattern "
-                    f"for the session, `/approve always` to approve permanently, or `/deny` to cancel."
-                )
+                msg = t("approval.dialog_text", cmd=cmd_preview, desc=desc)
                 try:
                     _approval_send_fut = safe_schedule_threadsafe(
                         _status_adapter.send(

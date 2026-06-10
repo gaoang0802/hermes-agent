@@ -24,10 +24,18 @@ approval:
   denied:          "      ✗ Denied"
   cancelled:       "      ✗ Cancelled"
   blocklist_message: "This command is on the unconditional blocklist and cannot be approved."
+  dialog_text: "⚠️ **Dangerous command requires approval:**\n```\n{cmd}\n```\nReason: {desc}\n\nReply `/approve` to execute, `/approve session` to approve this pattern for the session, `/approve always` to approve permanently, or `/deny` to cancel."
+  self_improvement_review: "  💾 Self-improvement review: {summary}"
+  label_memory: "Memory"
+  label_user_profile: "User profile"
 
 gateway:
   # Messenger replies to slash commands and implicit state changes.
   approval_expired: "⚠️ Approval expired (agent is no longer waiting). Ask the agent to try again."
+  steered_into_run: "⏩ Steered into current run{status_detail}. Your message arrives after the next tool call."
+  subagent_queued: "⏳ Subagent working{status_detail} — your message is queued for when it finishes (use /stop to cancel everything)."
+  shutdown_restart: "⚠️ Gateway restarting — Your current task will be interrupted. Send any message after restart and I'll try to resume where you left off."
+  shutdown_stop: "⚠️ Gateway shutting down — Your current task will be interrupted."
   draining:         "⏳ Draining {count} active agent(s) before restart..."
   goal_cleared:     "✓ Goal cleared."
   no_active_goal:   "No active goal."
