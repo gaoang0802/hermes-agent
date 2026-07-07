@@ -166,7 +166,9 @@ _MEMORY_REVIEW_PROMPT = (
     "2. Has the user expressed expectations about how you should behave, their work "
     "style, or ways they want you to operate?\n\n"
     "If something stands out, save it using the memory tool. "
-    "If nothing is worth saving, just say 'Nothing to save.' and stop."
+    "If nothing is worth saving, just say 'Nothing to save.' and stop.\n\n"
+    "IMPORTANT: The user speaks Chinese. Output your review result in Chinese, "
+    "not English."
 )
 
 _SKILL_REVIEW_PROMPT = (
@@ -248,6 +250,8 @@ _SKILL_REVIEW_PROMPT = (
     "same as any other agent-created skill.\n"
     "If the only skills that need updating are protected, say\n"
     "'Nothing to save.' and stop.\n\n"
+    "IMPORTANT: The user speaks Chinese. Output your review result in Chinese, "
+    "not English.\n\n"
     "Do NOT capture (these become persistent self-imposed constraints "
     "that bite you later when the environment changes):\n"
     "  • Environment-dependent failures: missing binaries, fresh-install "
@@ -356,7 +360,9 @@ _COMBINED_REVIEW_PROMPT = (
     "standalone constraint.\n\n"
     "Act on whichever of the two dimensions has real signal. If "
     "genuinely nothing stands out on either, say 'Nothing to save.' "
-    "and stop — but don't reach for that conclusion as a default."
+    "and stop — but don't reach for that conclusion as a default.\n\n"
+    "IMPORTANT: The user speaks Chinese. Output your review result in Chinese, "
+    "not English."
 )
 
 
@@ -517,15 +523,15 @@ def summarize_background_review_actions(
                         "…" if len(new_string) > 80 else ""
                     )
                     actions.append(
-                        f"📝 Skill '{skill_name}' patched: "
+                        f"📝 技能 '{skill_name}' 已打补丁: "
                         f"\"{old_preview}\" → \"{new_preview}\""
                     )
                 elif action == "create" and description:
-                    actions.append(f"📝 Skill '{skill_name}' created: {description}")
+                    actions.append(f"📝 技能 '{skill_name}' 已创建: {description}")
                 elif action == "edit" and description:
-                    actions.append(f"📝 Skill '{skill_name}' rewritten: {description}")
+                    actions.append(f"📝 技能 '{skill_name}' 已重写: {description}")
                 else:
-                    actions.append(f"📝 {message}" if message else f"Skill {action}")
+                    actions.append(f"📝 {message}" if message else f"技能: {action}")
             elif operations:
                 for op in operations:
                     if not isinstance(op, dict):
