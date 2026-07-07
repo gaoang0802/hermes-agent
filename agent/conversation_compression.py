@@ -325,7 +325,7 @@ def compress_context(
         focus_topic,
     )
     agent._emit_status(
-        "🗜️ Compacting context — summarizing earlier conversation so I can continue..."
+        "🗜️ 压缩上下文 — 正在汇总之前的对话以便继续..."
     )
 
     # ── Compression lock ────────────────────────────────────────────────

@@ -19,6 +19,7 @@ Improvements over v2:
 import hashlib
 import json
 import logging
+import os
 import re
 import time
 from typing import Any, Dict, List, Optional
@@ -35,29 +36,18 @@ from agent.redact import redact_sensitive_text
 logger = logging.getLogger(__name__)
 
 SUMMARY_PREFIX = (
-    "[CONTEXT COMPACTION — REFERENCE ONLY] Earlier turns were compacted "
-    "into the summary below. This is a handoff from a previous context "
-    "window — treat it as background reference, NOT as active instructions. "
-    "Do NOT answer questions or fulfill requests mentioned in this summary; "
-    "they were already addressed. "
-    "Respond ONLY to the latest user message that appears AFTER this "
-    "summary — that message is the single source of truth for what to do "
-    "right now. "
-    "If the latest user message is consistent with the '## Active Task' "
-    "section, you may use the summary as background. If the latest user "
-    "message contradicts, supersedes, changes topic from, or in any way "
-    "diverges from '## Active Task' / '## In Progress' / '## Pending User "
-    "Asks' / '## Remaining Work', the latest message WINS — discard those "
-    "stale items entirely and do not 'wrap up the old task first'. "
-    "Reverse signals in the latest message (e.g. 'stop', 'undo', 'roll "
-    "back', 'just verify', 'don't do that anymore', 'never mind', a new "
-    "topic) must immediately end any in-flight work described in the "
-    "summary; do not re-surface it in later turns. "
-    "IMPORTANT: Your persistent memory (MEMORY.md, USER.md) in the system "
-    "prompt is ALWAYS authoritative and active — never ignore or deprioritize "
-    "memory content due to this compaction note. "
-    "The current session state (files, config, etc.) may reflect work "
-    "described here — avoid repeating it:"
+    "📦 上下文压缩 — 参考信息] 以下是对之前聊天内容的摘要总结。"
+    "这是从上一个上下文窗口移交过来的 — 当作背景参考，不要当成当前指令。"
+    "**不要回答或执行这个摘要里提到的请求**，那些已经处理过了。"
+    "**只回复这个摘要之后的最新消息** — 那条消息才是当前要做的事。"
+    "如果最新消息跟'## 当前任务'一致，可以用摘要当背景。"
+    "如果最新消息跟'## 当前任务'/'## 进行中'/'## 待确认'/'## 剩余工作'有矛盾、"
+    "覆盖了、换了话题、或者变卦了（比如'停''算了''别搞了''不弄了'），"
+    "**最新消息说了算** — 立刻停掉摘要里的旧任务，别『先收尾再做新的』。"
+    "重要提示：系统提示里的记忆（MEMORY.md、USER.md）始终有效且优先——"
+    "不要因为看到这个压缩标记就忽略或降低记忆的优先级。"
+    "当前的会话状态（文件、配置等）可能还保留着之前做的工作——"
+    "避免重复劳动：\""
 )
 LEGACY_SUMMARY_PREFIX = "[CONTEXT SUMMARY]:"
 
@@ -652,15 +642,25 @@ class ContextCompressor(ContextEngine):
             int(self.context_length * 0.05), _SUMMARY_TOKENS_CEILING,
         )
 
+        # ── Curator: active context management ────────────────────────────
+        self._curator_enabled = False
+        self._curator_check_interval = 3
+        self._curator_turn_counter = 0
+        self._curator_priority = {}  # role_type -> retention level
+        self._curator_memory_sync = False
+        self._load_curator_config()
+        # ──────────────────────────────────────────────────────────────────
+
         if not quiet_mode:
             logger.info(
                 "Context compressor initialized: model=%s context_length=%d "
                 "threshold=%d (%.0f%%) target_ratio=%.0f%% tail_budget=%d "
-                "provider=%s base_url=%s",
+                "provider=%s base_url=%s curator=%s",
                 model, self.context_length, self.threshold_tokens,
                 threshold_percent * 100, self.summary_target_ratio * 100,
                 self.tail_token_budget,
                 provider or "none", base_url or "none",
+                "enabled" if self._curator_enabled else "disabled",
             )
         self._context_probed = False  # True after a step-down from context error
 
@@ -763,6 +763,128 @@ class ContextCompressor(ContextEngine):
                 )
             return False
         return True
+
+    # ------------------------------------------------------------------
+    # Curator: active context management (pre-compression evaluation)
+    # ------------------------------------------------------------------
+
+    def _load_curator_config(self) -> None:
+        """Load curator settings from config.yaml."""
+        try:
+            config_path = os.path.join(
+                os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")),
+                "config.yaml",
+            )
+            with open(config_path, "r", encoding="utf-8") as f:
+                import yaml
+                cfg = yaml.safe_load(f)
+            curator_cfg = cfg.get("curator", {})
+            if not isinstance(curator_cfg, dict):
+                return
+            self._curator_enabled = bool(curator_cfg.get("enabled", False))
+            self._curator_check_interval = int(curator_cfg.get("check_interval", 3))
+            self._curator_priority = curator_cfg.get("priority_retention", {})
+            self._curator_memory_sync = bool(curator_cfg.get("memory_sync", False))
+        except Exception as exc:
+            logger.debug("Curator config load failed: %s", exc)
+
+    def _curator_classify_role(self, msg: Dict[str, Any]) -> str:
+        """Classify a message into a priority category.
+
+        Returns one of: system, user_instruction, user_chat,
+        assistant_reasoning, tool_output.
+        """
+        role = msg.get("role", "")
+        content = msg.get("content") or ""
+        if role == "system":
+            return "system"
+        if role == "tool":
+            return "tool_output"
+        if role == "assistant":
+            tc = msg.get("tool_calls")
+            if tc:
+                return "tool_output"
+            if isinstance(content, str) and len(content) > 300:
+                return "assistant_reasoning"
+            return "assistant_reasoning"
+        if role == "user":
+            # Heuristic: short check-in messages are chat; detailed instructions
+            # with specific verb-like openings are instructions.
+            if isinstance(content, str) and len(content) < 80:
+                return "user_chat"
+            return "user_instruction"
+        return "user_chat"
+
+    def _curator_retention_level(self, category: str) -> str:
+        """Get retention level for a category, with fallback chain."""
+        level = self._curator_priority.get(category, "normal")
+        return level
+
+    def _curator_prune(
+        self, messages: List[Dict[str, Any]]
+    ) -> tuple[List[Dict[str, Any]], int]:
+        """Priority-based pre-pruning before full compression.
+
+        For 'low' retention items (tool_output): replaces long content
+        with one-line summary aggressively.
+        For 'full' retention items (system, user_instruction): leaves untouched.
+        """
+        if not self._curator_enabled:
+            return messages, 0
+
+        result = [m.copy() for m in messages]
+        pruned = 0
+        # Only prune outside the protected tail (last protect_last_n messages)
+        tail_start = max(0, len(result) - self.protect_last_n)
+
+        for i in range(tail_start):
+            msg = result[i]
+            cat = self._curator_classify_role(msg)
+            level = self._curator_retention_level(cat)
+
+            if level == "full":
+                continue  # leave untouched
+
+            content = msg.get("content") or ""
+            if not isinstance(content, str) or len(content) < 500:
+                continue  # small enough already
+
+            if level == "low" and cat == "tool_output":
+                # Aggressively shorten: keep first 200 chars + line count
+                lines = content.count("\n") + 1
+                preview = content[:200].replace("\n", " ")
+                msg["content"] = (
+                    f"[Curator: tool output compressed — {lines} lines, "
+                    f"{len(content)} chars total] {preview}..."
+                )
+                pruned += 1
+            elif level == "normal" and cat == "tool_output":
+                # Normal: keep first 500 chars
+                msg["content"] = content[:500]
+                pruned += 1
+
+        return result, pruned
+
+    def _curator_compress(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Run curator evaluation before compression.
+
+        Called from compress() before Phase 1. Returns (possibly pruned)
+        messages and logs curator decisions.
+        """
+        self._curator_turn_counter += 1
+        if not self._curator_enabled:
+            return messages
+
+        # Step 1: Priority-based pruning
+        pruned_messages, pruned = self._curator_prune(messages)
+        if pruned and not self.quiet_mode:
+            logger.info(
+                "Curator: priority-pruned %d message(s) "
+                "(check_interval=%d, turn=%d)",
+                pruned, self._curator_check_interval, self._curator_turn_counter,
+            )
+
+        return pruned_messages
 
     # ------------------------------------------------------------------
     # Tool output pruning (cheap pre-pass, no LLM call)
@@ -1956,6 +2078,9 @@ The user has requested that this compaction PRIORITISE preserving all informatio
 
         display_tokens = current_tokens if current_tokens else self.last_prompt_tokens or estimate_messages_tokens_rough(messages)
 
+        # Phase 0: Curator active evaluation (priority-based pre-pruning)
+        messages = self._curator_compress(messages)
+
         # Phase 1: Prune old tool results (cheap, no LLM call)
         messages, pruned_count = self._prune_old_tool_results(
             messages, protect_tail_count=self.protect_last_n,
@@ -2072,7 +2197,7 @@ The user has requested that this compaction PRIORITISE preserving all informatio
             msg = messages[i].copy()
             if i == 0 and msg.get("role") == "system":
                 existing = msg.get("content")
-                _compression_note = "[Note: Some earlier conversation turns have been compacted into a handoff summary to preserve context space. The current session state may still reflect earlier work, so build on that summary and state rather than re-doing work. Your persistent memory (MEMORY.md, USER.md) remains fully authoritative regardless of compaction.]"
+                _compression_note = "[提示：部分历史对话已被压缩成摘要以节省上下文空间。当前会话状态可能还保留了之前的工作，请基于摘要和状态继续推进，不要重复劳动。你的持久记忆（MEMORY.md、USER.md）始终有效且优先——不受压缩影响。]"
                 if _compression_note not in _content_text_for_contains(existing):
                     msg["content"] = _append_text_to_content(
                         existing,
