@@ -827,7 +827,7 @@ def _create_skill(name: str, content: str, category: str = None) -> Dict[str, An
 
     result = {
         "success": True,
-        "message": f"Skill '{name}' created.",
+        "message": f"已创建: 技能 '{name}'.",
         "path": str(skill_dir.relative_to(SKILLS_DIR)),
         "skill_md": str(skill_md),
         "_change": {"description": _desc},
@@ -888,7 +888,7 @@ def _edit_skill(name: str, content: str) -> Dict[str, Any]:
 
     return {
         "success": True,
-        "message": f"Skill '{name}' updated (full rewrite).",
+        "message": f"已重写: 技能 '{name}' (全文替换).",
         "path": str(existing["path"]),
         "_change": {"description": _desc},
     }
@@ -997,7 +997,7 @@ def _patch_skill(
 
     result = {
         "success": True,
-        "message": f"Patched {'SKILL.md' if not file_path else file_path} in skill '{name}' ({match_count} replacement{'s' if match_count > 1 else ''}).",
+        "message": f"已打补丁: 技能 '{name}' 的 {'SKILL.md' if not file_path else file_path} ({match_count} 处替换).",
     }
     # Include change previews for verbose notifications
     result["_change"] = {
@@ -1223,7 +1223,7 @@ def _remove_file(name: str, file_path: str) -> Dict[str, Any]:
 
     return {
         "success": True,
-        "message": f"File '{file_path}' removed from skill '{name}'.",
+        "message": f"已删除: 技能 '{name}' 的文件 '{file_path}'.",
     }
 
 

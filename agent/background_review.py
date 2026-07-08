@@ -476,13 +476,13 @@ def summarize_background_review_actions(
 
         message_lower = message.lower()
         if not verbose:
-            if "created" in message_lower:
+            if "created" in message_lower or "已创建" in message:
                 actions.append(message)
                 continue
-            if "updated" in message_lower:
+            if "updated" in message_lower or "已更新" in message or "已重写" in message:
                 actions.append(message)
                 continue
-            if is_skill and "patched" in message_lower:
+            if is_skill and ("patched" in message_lower or "已打补丁" in message):
                 actions.append(message)
                 continue
 
@@ -564,6 +564,8 @@ def summarize_background_review_actions(
             or "replaced" in message_lower
             or "removed" in message_lower
             or "applied" in message_lower
+            or "已创建" in message
+            or "已删除" in message
             or (target and "add" in message.lower())
             or "Entry added" in message
         ):
