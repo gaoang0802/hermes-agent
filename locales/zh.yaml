@@ -14,7 +14,7 @@ approval:
   denied:          "      ✗ 已拒绝"
   cancelled:       "      ✗ 已取消"
   blocklist_message: "此命令位于无条件拦截列表中，无法被批准。"
-  dialog_text: "⚠️ **危险命令需要审批：**\n```\n{cmd}\n```\n原因：{desc}\n\n回复 `/approve` 执行，`/approve session` 本次会话内允许，`/approve always` 永久允许，或 `/deny` 拒绝。"
+  dialog_text: "⚠️ **危险命令需要审批：**\n```\n{cmd}\n```\n原因：{desc}\n\n回复 `{prefix}approve` 执行，`{prefix}approve session` 本次会话内允许，`{prefix}approve always` 永久允许，或 `{prefix}deny` 拒绝。"
   self_improvement_review: "  💾 自我改进：{summary}"
   label_memory: "记忆"
   label_user_profile: "用户资料"
@@ -408,3 +408,11 @@ Future messages in this room will use that transcript until `/reset` or another 
     session_db_unavailable_prefix: "会话数据库不可用"
     session_not_found:           "数据库中未找到该会话。"
     warn_passthrough:            "⚠️ {error}"
+
+run_agent:
+  compacting_context_short: "正在压缩上下文..."
+  interrupted:               "⚡ 中断工具循环..."
+  budget_exhausted:          "⚠️  迭代预算已耗尽（已使用 {used}/{total} 次迭代）"
+  conversation_complete:     "🎉 对话完成，共 {count} 次 API 调用"
+  all_retries_exhausted:     "❌ 所有 API 重试都失败了，未能获得成功响应。"
+  api_error:                 "❌ 第 #{call} 次 API 调用出错：{error}"

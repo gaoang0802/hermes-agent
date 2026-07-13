@@ -165,6 +165,20 @@ _SUMMARY_RATIO = 0.08  # HERMES-PATCH: reduced from 0.20 to 0.08
 # Absolute ceiling for summary tokens (even on very large context windows)
 _SUMMARY_TOKENS_CEILING = 12_000
 
+# Compression efficiency level thresholds (HERMES-PATCH)
+# 🟢 >= 5x savings (excellent), 🟡 >= 3x (decent), 🔴 below (poor)
+_COMPRESSION_EFFICIENCY_GREEN = 5
+_COMPRESSION_EFFICIENCY_YELLOW = 3
+
+
+def _compression_efficiency_level(efficiency: float) -> str:
+    """Classify compression savings ratio into 🟢/🟡/🔴."""
+    if efficiency >= _COMPRESSION_EFFICIENCY_GREEN:
+        return "🟢"
+    if efficiency >= _COMPRESSION_EFFICIENCY_YELLOW:
+        return "🟡"
+    return "🔴"
+
 # Placeholder used when pruning old tool results
 _PRUNED_TOOL_PLACEHOLDER = "[Old tool output cleared to save context space]"
 
@@ -3182,9 +3196,9 @@ This compaction should PRIORITISE preserving all information related to the focu
             summary_tokens_est = max(_MIN_SUMMARY_TOKENS, min(budget, self.max_summary_tokens))
             if summary_tokens_est > 0 and saved_estimate > 0:
                 efficiency = saved_estimate / summary_tokens_est
-                level = "🟢" if efficiency >= 5 else ("🟡" if efficiency >= 3 else "🔴")
+                level = _compression_efficiency_level(efficiency)
                 logger.info(
-                    "Compression efficiency: %s %.1f:1 (saved=%d input, cost=%d output tokens)",
+                    "Compression efficiency: %s %.1f:1 (saved=%d input, est.cost=%d summary tokens)",
                     level, efficiency, saved_estimate, summary_tokens_est,
                 )
 

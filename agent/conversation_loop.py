@@ -640,7 +640,7 @@ def run_conversation(
             interrupted = True
             _turn_exit_reason = "interrupted_by_user"
             if not agent.quiet_mode:
-                agent._safe_print("\n⚡ Breaking out of tool loop due to interrupt...")
+                agent._safe_print(f"\n{t('run_agent.interrupted')}")
             break
         
         api_call_count += 1
@@ -655,7 +655,7 @@ def run_conversation(
         elif not agent.iteration_budget.consume():
             _turn_exit_reason = "budget_exhausted"
             if not agent.quiet_mode:
-                agent._safe_print(f"\n⚠️  Iteration budget exhausted ({agent.iteration_budget.used}/{agent.iteration_budget.max_total} iterations used)")
+                agent._safe_print(f"\n{t('run_agent.budget_exhausted', used=agent.iteration_budget.used, total=agent.iteration_budget.max_total)}")
             break
 
         # Fire step_callback for gateway hooks (agent:step event)
@@ -4202,7 +4202,7 @@ def run_conversation(
         # the `response` variable is still None. Break out cleanly.
         if response is None:
             _turn_exit_reason = "all_retries_exhausted_no_response"
-            print(f"{agent.log_prefix}❌ All API retries exhausted with no successful response.")
+            print(f"{agent.log_prefix}{t('run_agent.all_retries_exhausted')}")
             agent._persist_session(messages, conversation_history)
             break
 
@@ -5210,11 +5210,11 @@ def run_conversation(
                 
                 _turn_exit_reason = f"text_response(finish_reason={finish_reason})"
                 if not agent.quiet_mode:
-                    agent._safe_print(f"🎉 Conversation completed after {api_call_count} OpenAI-compatible API call(s)")
+                    agent._safe_print(f"\n{t('run_agent.conversation_complete', count=api_call_count)}")
                 break
             
         except Exception as e:
-            error_msg = f"Error during OpenAI-compatible API call #{api_call_count}: {str(e)}"
+            error_msg = t("run_agent.api_error", call=api_call_count, error=str(e))
             try:
                 print(f"❌ {error_msg}")
             except (OSError, ValueError):

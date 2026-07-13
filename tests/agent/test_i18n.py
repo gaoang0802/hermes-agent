@@ -227,3 +227,71 @@ def test_t_resolves_real_string_in_source_checkout():
     regressions independent of packaging."""
     assert i18n.t("gateway.reset.header_default", lang="en") != "gateway.reset.header_default"
     assert i18n.t("gateway.status.header", lang="en") != "gateway.status.header"
+
+
+# ---------------------------------------------------------------------------
+# run_agent runtime status translations (PR #27395 coverage)
+# ---------------------------------------------------------------------------
+
+def test_run_agent_keys_localized():
+    """run_agent.* keys return Chinese when lang=zh, English when lang=en."""
+    zh_keys = {
+        "run_agent.interrupted":               "中断",
+        "run_agent.budget_exhausted":           "迭代预算已耗尽",
+        "run_agent.conversation_complete":      "对话完成",
+        "run_agent.all_retries_exhausted":      "重试都失败了",
+        "run_agent.api_error":                  "API 调用出错",
+        "run_agent.compacting_context_short":   "正在压缩上下文",
+    }
+    for key, zh_needle in zh_keys.items():
+        assert zh_needle in i18n.t(key, lang="zh"), f"{key} zh should contain {zh_needle!r}"
+        en = i18n.t(key, lang="en")
+        assert en != key, f"{key} en should not be a bare key path"
+        assert en, f"{key} en should not be empty"
+
+
+def test_run_agent_keys_format_placeholders():
+    """run_agent.* keys interpolate {used}, {total}, {count}, {call}, {error}."""
+    assert "5" in i18n.t("run_agent.budget_exhausted", lang="en", used=5, total=90)
+    assert "90" in i18n.t("run_agent.budget_exhausted", lang="en", used=5, total=90)
+
+    assert "42" in i18n.t("run_agent.conversation_complete", lang="en", count=42)
+
+    assert "#3" in i18n.t("run_agent.api_error", lang="en", call=3, error="timeout")
+    assert "timeout" in i18n.t("run_agent.api_error", lang="en", call=3, error="timeout")
+
+
+def test_run_agent_keys_format_placeholders_chinese():
+    """Same placeholders work in Chinese."""
+    zh_exhausted = i18n.t("run_agent.budget_exhausted", lang="zh", used=5, total=90)
+    assert "5" in zh_exhausted and "90" in zh_exhausted
+
+    zh_done = i18n.t("run_agent.conversation_complete", lang="zh", count=42)
+    assert "42" in zh_done
+
+    zh_err = i18n.t("run_agent.api_error", lang="zh", call=3, error="超时")
+    assert "3" in zh_err and "超时" in zh_err
+
+
+# ---------------------------------------------------------------------------
+# approval.dialog_text typed-command prefix (PR #27395 coverage)
+# ---------------------------------------------------------------------------
+
+def test_approval_dialog_text_respects_prefix():
+    """approval.dialog_text uses {prefix} so Slack/Matrix get !approve not /approve."""
+    en_slash = i18n.t("approval.dialog_text", lang="en", cmd="ls", desc="test", prefix="/")
+    assert "`/approve`" in en_slash, "prefix=/ should produce /approve"
+    assert "`/deny`" in en_slash
+
+    en_bang = i18n.t("approval.dialog_text", lang="en", cmd="ls", desc="test", prefix="!")
+    assert "`!approve`" in en_bang, "prefix=! should produce !approve"
+    assert "`!deny`" in en_bang
+
+
+def test_approval_dialog_text_prefix_chinese():
+    """Same prefix placeholder works in Chinese translation."""
+    zh_slash = i18n.t("approval.dialog_text", lang="zh", cmd="ls", desc="test", prefix="/")
+    assert "`/approve`" in zh_slash
+
+    zh_bang = i18n.t("approval.dialog_text", lang="zh", cmd="ls", desc="test", prefix="!")
+    assert "`!approve`" in zh_bang

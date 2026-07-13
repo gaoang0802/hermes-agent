@@ -18131,7 +18131,7 @@ class GatewayRunner(GatewayAuthorizationMixin, GatewayKanbanWatchersMixin, Gatew
                 # Slack threads and reserved by Matrix clients.
                 _p = getattr(_status_adapter, "typed_command_prefix", "/")
                 cmd_preview = cmd[:200] + "..." if len(cmd) > 200 else cmd
-                msg = t("approval.dialog_text", cmd=cmd_preview, desc=desc)
+                msg = t("approval.dialog_text", cmd=cmd_preview, desc=desc, prefix=_p)
                 try:
                     _approval_send_fut = safe_schedule_threadsafe(
                         _status_adapter.send(
